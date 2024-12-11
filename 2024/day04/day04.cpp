@@ -61,6 +61,22 @@ int countXMAS(char wordSearch[WSSIZE][WSSIZE]) {
     return count;
 }
 
+int countX_MAS(char wordSearch[WSSIZE][WSSIZE]) {
+    int count = 0;
+    for (int i = 0; i < WSSIZE; i++) {
+        for (int j = 0; j < WSSIZE; j++) {
+            if (wordSearch[i][j] == 'A') {
+                std::string left({charAt(wordSearch, i-1, j-1), 'A', charAt(wordSearch, i+1, j+1)});   
+                std::string right({charAt(wordSearch, i-1, j+1), 'A', charAt(wordSearch, i+1, j-1)});
+                if ((left == "MAS" || left == "SAM") && (right == "MAS" || right == "SAM"))
+                    count++;
+            }  
+        }
+    }
+
+    return count;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr << "Error. No input file provided." << std::endl;
@@ -71,6 +87,7 @@ int main(int argc, char *argv[]) {
     readInput(argv[1], wordSearch);
 
     std::cout << "Part 1 solution: " << countXMAS(wordSearch) << std::endl;
+    std::cout << "Part 2 solution: " << countX_MAS(wordSearch) << std::endl;
 
     return 0;
 }
