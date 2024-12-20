@@ -42,13 +42,11 @@ void readInput(const char *filename, std::unordered_map<int, std::vector<int>> &
 }
 
 bool compliesWithRules(const std::unordered_map<int, std::vector<int>> &rules, const std::vector<int> &update) {
-    for (size_t i = 0; i < update.size(); i++) {
-        for (size_t j = 0; j < i; j++) {
-            std::vector<int> valuesAfter = rules.at(update[i]);
-            auto it = std::find(valuesAfter.begin(), valuesAfter.end(), update[j]);
-            if (it != valuesAfter.end())
-                return false;
-        }
+    for (size_t i = 1; i < update.size(); i++) {
+        std::vector<int> valuesAfter = rules.at(update[i]);
+        auto it = std::find(valuesAfter.begin(), valuesAfter.end(), update[i-1]);
+        if (it != valuesAfter.end())
+            return false;
     }
 
     return true;
@@ -65,6 +63,32 @@ int checkOrders(const std::unordered_map<int, std::vector<int>> &rules, const st
     return midPageSum;
 }
 
+int fixIncorrectlyOrdered(const std::unordered_map<int, std::vector<int>> &rules, std::vector<std::vector<int>> &updates) {
+    int midPageSum = 0;
+
+    for (std::vector<int> &update : updates) {
+        bool correctOrder = compliesWithRules(rules, update);
+        if (!correctOrder) {
+            int j = 0;
+            while(!correctOrder) {
+                for (size_t i = 1; i < update.size(); i++) {
+                    std::vector<int> valuesAfter = rules.at(update[i]);
+                    auto it = std::find(valuesAfter.begin(), valuesAfter.end(), update[i-1]);
+                    if (it != valuesAfter.end()) {
+                        std::swap(update[i-1], update[i]);
+                    }
+                }
+                correctOrder = compliesWithRules(rules, update);
+                j++;
+            }
+        
+            midPageSum += update[std::round(update.size() / 2)];
+        }
+    }
+
+    return midPageSum;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cerr << "Error. No input file provided." << std::endl;
@@ -76,6 +100,7 @@ int main(int argc, char *argv[]) {
     readInput(argv[1], rules, updates);
 
     std::cout << "Part 1 solution: " << checkOrders(rules, updates) << std::endl;
+    std::cout << "Part 2 solution: " << fixIncorrectlyOrdered(rules, updates) << std::endl;
 
     return 0;
 }
