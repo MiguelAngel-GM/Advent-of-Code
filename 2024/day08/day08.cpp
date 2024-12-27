@@ -64,6 +64,36 @@ void calculateAntinodes(
     antinode2.y = secondAntenna.y < firstAntenna.y ? secondAntenna.y + 2 * dy : secondAntenna.y - 2 * dy;
     if (isInBounds(antinode2))
         antinodes.push_back(antinode2);
+    
+    if (considerHarmonics) {
+        int multiplier = 3;
+        bool inBounds = true;
+        
+        // Propagate first antinode
+        while (inBounds) {
+            antinode1.x = firstAntenna.x < secondAntenna.x ? firstAntenna.x + multiplier * dx : firstAntenna.x - multiplier * dx;
+            antinode1.y = firstAntenna.y < secondAntenna.y ? firstAntenna.y + multiplier * dy : firstAntenna.y - multiplier * dy;
+            inBounds = isInBounds(antinode1);
+            if (inBounds) {
+                antinodes.push_back(antinode1);
+                multiplier++;
+            }
+        }
+
+        // Propagate second antinode
+        multiplier = 3;
+        inBounds = true;
+
+        while (inBounds) {            
+            antinode2.x = secondAntenna.x < firstAntenna.x ? secondAntenna.x + multiplier * dx : secondAntenna.x - multiplier * dx;
+            antinode2.y = secondAntenna.y < firstAntenna.y ? secondAntenna.y + multiplier * dy : secondAntenna.y - multiplier * dy;
+            inBounds = isInBounds(antinode2);
+            if (inBounds) {
+                antinodes.push_back(antinode2);
+                multiplier++;
+            }
+        }
+    }
 }
 
 int countAntinodes(char map[MAP_SIZE][MAP_SIZE], bool considerHarmonics) {
@@ -90,11 +120,18 @@ int countAntinodes(char map[MAP_SIZE][MAP_SIZE], bool considerHarmonics) {
                     }
                 }
             }
-
-            if (considerHarmonics)
-                antinodes++;
         }
     } 
+
+    if (considerHarmonics) {
+        // Add all the antennas that havent been marked as antinodes
+        for (int i = 0; i < MAP_SIZE; i++) {
+            for (int j = 0; j < MAP_SIZE; j++) {
+                if (isalnum(map[i][j]))
+                    antinodes++;
+            }
+        }
+    }
 
     return antinodes;
 }
@@ -109,6 +146,9 @@ int main(int argc, char *argv[]) {
     readInput(argv[1], map);
 
     std::cout << "Part 1 solution: " << countAntinodes(map, false) << std::endl;
+    
+    readInput(argv[1], map);
+    std::cout << "Part 2 solution: " << countAntinodes(map, true) << std::endl;
     
     return 0;
 }
